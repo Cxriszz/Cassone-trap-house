@@ -51,7 +51,18 @@ function App() {
       .select('*')
       .order('created_at', { ascending: true })
       
-    if (pData) setParticipants(pData)
+    if (pData) {
+      setParticipants(pData)
+      const urlParams = new URLSearchParams(window.location.search)
+      const editId = urlParams.get('edit')
+      if (editId) {
+        const pToEdit = pData.find(x => x.id === editId)
+        if (pToEdit) {
+          setParticipantToEdit(pToEdit)
+          setIsEditFormOpen(true)
+        }
+      }
+    }
     
     // Fetch Admins
     const { data: aData, error: aError } = await supabase
@@ -134,20 +145,17 @@ function App() {
     
     // Real SMS to Guest
     alert("Eine Bestätigungs-SMS wurde soeben an dich verschickt!")
+    const editLink = `${window.location.origin}/?edit=${participantWithId.id}`
+    const smsText = `Cassone: Buchung eingegangen! Dein Status ist in Bearbeitung. Notfallkontakt: ${adminPhone1}. Bearbeiten/Löschen: ${editLink}`
+    
     addAlert(
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         <strong>📩 [SIMULIERTE SMS an {newParticipant.phone}]:</strong>
-        <span>Buchung eingegangen! Dein Status ist in Bearbeitung. Notfallkontakt: {adminPhone1}</span>
-        <button 
-          onClick={() => handleSimulateEditLink(participantWithId.id)}
-          style={{ background: 'var(--color-brand)', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', alignSelf: 'flex-start', marginTop: '4px' }}
-        >
-          Eintrag bearbeiten / löschen (Link)
-        </button>
+        <span>{smsText}</span>
       </div>
     )
     
-    sendRealSms(newParticipant.phone, `Cassone: Buchung eingegangen! Dein Status ist in Bearbeitung. Notfallkontakt: ${adminPhone1}`)
+    sendRealSms(newParticipant.phone, smsText)
   }
 
   const handleEditSubmit = async (updatedParticipant) => {
