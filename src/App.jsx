@@ -90,14 +90,11 @@ function App() {
       })
       if (error) {
         console.error("SMS Error:", error)
-        addAlert(`❌ SMS Error an ${to}: ${error.message || 'Unbekannter Fehler. (Evtl. Nummer nicht bei Twilio verifiziert?)'}`)
       } else if (data && data.error) {
         console.error("SMS Data Error:", data.error)
-        addAlert(`❌ SMS Error an ${to}: ${data.error}`)
       }
     } catch (e) {
       console.error(e)
-      addAlert(`❌ SMS Exception an ${to}: ${e.message}`)
     }
   }
 
@@ -147,19 +144,18 @@ function App() {
     // Real SMS to Admin
     if (notifyAdmin) {
       const phones = [adminPhone1, adminPhone2, adminPhone3].filter(p => p && p.trim() !== '')
-      phones.forEach(phone => {
+      for (const phone of phones) {
         const msg = `Neue Buchung von ${newParticipant.name}. Bitte prüfen!`
-        addAlert(`📱 [ADMIN SMS an ${phone}]: ${msg}`)
-        sendRealSms(phone, msg)
-      })
+        await sendRealSms(phone, msg)
+      }
     }
     
     // Real SMS to Guest
-    alert("Eine Bestätigungs-SMS wurde soeben an dich verschickt!")
+    alert("Deine Buchung war erfolgreich!")
     const editLink = `${window.location.origin}/?edit=${participantWithId.id}`
     const smsText = `Cassone: Buchung eingegangen! Dein Status ist in Bearbeitung. Kontakt: ${adminPhone1}. Bearbeiten/Löschen: ${editLink}`
     
-    sendRealSms(formattedPhone, smsText)
+    await sendRealSms(formattedPhone, smsText)
   }
 
   const handleEditSubmit = async (updatedParticipant) => {
@@ -236,8 +232,7 @@ function App() {
         const actionText = newStatus === 'Genehmigt' ? 'Genehmigt' : 'Abgelehnt'
         
         const msg = `Hallo ${p?.name}, deine Buchung wurde: ${actionText}!`
-        addAlert(`📱 [GAST SMS an ${p?.phone}]: ${msg}`)
-        sendRealSms(p?.phone, msg)
+        await sendRealSms(p?.phone, msg)
       } else {
         alert("Fehler beim Update!")
       }
