@@ -40,31 +40,31 @@ const ParticipantsTable = ({ participants, onDelete, onStatusChange, isAdmin }) 
     if (isAdmin) {
       return (
         <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-          {p.status === 'approved' ? (
+          {p.status === 'Genehmigt' ? (
             <span className="badge badge-status-approved">Genehmigt</span>
           ) : (
             <button 
               className="action-btn approve" 
-              onClick={() => onStatusChange(p.id, 'approved')}
+              onClick={() => onStatusChange(p.id, 'Genehmigt')}
               title="Genehmigen (SMS senden)"
             >
               <Check size={16} />
             </button>
           )}
           
-          {p.status === 'rejected' ? (
+          {p.status === 'Abgelehnt' ? (
             <span className="badge badge-status-rejected">Abgelehnt</span>
           ) : (
             <button 
               className="action-btn reject" 
-              onClick={() => onStatusChange(p.id, 'rejected')}
+              onClick={() => onStatusChange(p.id, 'Abgelehnt')}
               title="Ablehnen (SMS senden)"
             >
               <X size={16} />
             </button>
           )}
           
-          {p.status === 'pending' && (
+          {p.status === 'Ausstehend' && (
             <span className="badge badge-status-pending">Ausstehend</span>
           )}
         </div>
@@ -73,9 +73,9 @@ const ParticipantsTable = ({ participants, onDelete, onStatusChange, isAdmin }) 
 
     // Non-admin view
     switch (p.status) {
-      case 'approved': return <span className="badge badge-status-approved">✅ Genehmigt</span>;
-      case 'rejected': return <span className="badge badge-status-rejected">❌ Abgelehnt</span>;
-      case 'pending': 
+      case 'Genehmigt': return <span className="badge badge-status-approved">✅ Genehmigt</span>;
+      case 'Abgelehnt': return <span className="badge badge-status-rejected">❌ Abgelehnt</span>;
+      case 'Ausstehend': 
       default: return <span className="badge badge-status-pending"><Clock size={12} style={{marginRight: '2px'}}/> In Bearbeitung</span>;
     }
   }
