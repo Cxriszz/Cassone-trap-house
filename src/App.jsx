@@ -111,8 +111,12 @@ function App() {
   }
 
   const handleAddParticipant = async (newParticipant) => {
-    let formattedPhone = newParticipant.phone.trim();
-    if (formattedPhone.startsWith('0')) {
+    // Keep only digits and '+'
+    let formattedPhone = newParticipant.phone.replace(/[^0-9+]/g, '');
+    
+    if (formattedPhone.startsWith('00')) {
+      formattedPhone = '+' + formattedPhone.substring(2);
+    } else if (formattedPhone.startsWith('0')) {
       formattedPhone = '+49' + formattedPhone.substring(1);
     } else if (!formattedPhone.startsWith('+')) {
       formattedPhone = '+49' + formattedPhone;
