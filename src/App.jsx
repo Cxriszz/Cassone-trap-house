@@ -79,9 +79,14 @@ function App() {
       })
       if (error) {
         console.error("SMS Error:", error)
+        addAlert(`❌ SMS Error an ${to}: ${error.message || 'Unbekannter Fehler. (Evtl. Nummer nicht bei Twilio verifiziert?)'}`)
+      } else if (data && data.error) {
+        console.error("SMS Data Error:", data.error)
+        addAlert(`❌ SMS Error an ${to}: ${data.error}`)
       }
     } catch (e) {
       console.error(e)
+      addAlert(`❌ SMS Exception an ${to}: ${e.message}`)
     }
   }
 

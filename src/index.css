@@ -537,6 +537,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 800px) {
+  .app-container {
+    padding: 1rem;
+  }
+  
+  .glass-panel {
+    padding: 1.5rem;
+  }
+
   .footer-brand-container {
     flex-direction: column;
     padding: 1.5rem;
@@ -550,11 +558,53 @@ h1, h2, h3, h4, h5, h6 {
   .admin-login-wrapper { order: 1; width: 100%; }
   .logo-wrapper.right { order: 3; }
   .title { font-size: 2.2rem; }
+  
+  .flex-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .flex-between > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .flex-between .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
 }
 
 @media (max-width: 600px) {
   .form-row { grid-template-columns: 1fr; }
   .participants-table { font-size: 0.85rem; }
+  
+  .modal-content {
+    padding: 1.5rem !important;
+  }
+  
+  .rules-container {
+    height: 200px;
+  }
+  
+  .admin-banner {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  /* Make table horizontally scrollable */
+  .table-container {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  th, td {
+    white-space: nowrap;
+  }
+  
+  .badge {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+  }
 }
 
 /* Action buttons in table */
