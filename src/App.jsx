@@ -111,6 +111,13 @@ function App() {
   }
 
   const handleAddParticipant = async (newParticipant) => {
+    let formattedPhone = newParticipant.phone.trim();
+    if (formattedPhone.startsWith('0')) {
+      formattedPhone = '+49' + formattedPhone.substring(1);
+    } else if (!formattedPhone.startsWith('+')) {
+      formattedPhone = '+49' + formattedPhone;
+    }
+
     const { data, error } = await supabase.from('participants').insert([{
       name: newParticipant.name,
       start_location: newParticipant.start_location,
@@ -119,7 +126,7 @@ function App() {
       transport_mode: newParticipant.transport_mode,
       has_seats: newParticipant.has_seats,
       schlafplatz: newParticipant.schlafplatz,
-      phone: newParticipant.phone,
+      phone: formattedPhone,
       notes: newParticipant.notes,
       status: 'Ausstehend'
     }]).select()
@@ -146,16 +153,9 @@ function App() {
     // Real SMS to Guest
     alert("Eine Bestätigungs-SMS wurde soeben an dich verschickt!")
     const editLink = `${window.location.origin}/?edit=${participantWithId.id}`
-    const smsText = `Cassone: Buchung eingegangen! Dein Status ist in Bearbeitung. Notfallkontakt: ${adminPhone1}. Bearbeiten/Löschen: ${editLink}`
+    const smsText = `Cassone: Buchung eingegangen! Dein Status ist in Bearbeitung. Kontakt: ${adminPhone1}. Bearbeiten/Löschen: ${editLink}`
     
-    addAlert(
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <strong>📩 [SIMULIERTE SMS an {newParticipant.phone}]:</strong>
-        <span>{smsText}</span>
-      </div>
-    )
-    
-    sendRealSms(newParticipant.phone, smsText)
+    sendRealSms(formattedPhone, smsText)
   }
 
   const handleEditSubmit = async (updatedParticipant) => {
