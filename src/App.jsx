@@ -128,6 +128,7 @@ function App() {
       has_seats: newParticipant.has_seats,
       schlafplatz: newParticipant.schlafplatz,
       phone: formattedPhone,
+      hide_phone: newParticipant.hide_phone,
       notes: newParticipant.notes,
       status: 'Ausstehend'
     }]).select()
@@ -171,6 +172,7 @@ function App() {
       has_seats: updatedParticipant.has_seats,
       schlafplatz: updatedParticipant.schlafplatz,
       phone: updatedParticipant.phone,
+      hide_phone: updatedParticipant.hide_phone,
       notes: updatedParticipant.notes,
       status: newStatus
     }).eq('id', updatedParticipant.id).select()

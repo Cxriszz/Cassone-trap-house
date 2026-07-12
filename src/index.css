@@ -583,7 +583,7 @@ h1, h2, h3, h4, h5, h6 {
     align-items: flex-start; /* Fixes top/bottom cutoff on mobile */
     overflow-y: auto;
     padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-bottom: 8rem; /* Extra huge padding to ensure safe scroll clearance on iOS */
   }
   
   .modal-content {

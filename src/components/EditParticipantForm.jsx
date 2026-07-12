@@ -13,6 +13,7 @@ const EditParticipantForm = ({ isOpen, onClose, onSubmit, participants = [], ini
     has_seats: false,
     schlafplatz: '',
     phone: '',
+    hide_phone: false,
     notes: ''
   })
 
@@ -199,6 +200,13 @@ const EditParticipantForm = ({ isOpen, onClose, onSubmit, participants = [], ini
                 placeholder="+49 ..." required
                 value={formData.phone} onChange={handleChange}
               />
+              <div className="checkbox-group" style={{ marginTop: '0.5rem' }}>
+                <input 
+                  type="checkbox" id="edit_hide_phone" name="hide_phone" 
+                  checked={formData.hide_phone} onChange={handleChange}
+                />
+                <label htmlFor="edit_hide_phone">Meine Handynummer nicht öffentlich in der Tabelle anzeigen</label>
+              </div>
             </div>
           </div>
           

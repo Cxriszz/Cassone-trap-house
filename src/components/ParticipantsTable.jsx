@@ -1,6 +1,6 @@
 import { format, parseISO, differenceInDays } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { Trash2, Phone, Train, Car, Bus, Bike, HelpCircle, Check, X, Clock } from 'lucide-react'
+import { Trash2, Phone, Train, Car, Bus, Bike, HelpCircle, Check, X, Clock, Lock } from 'lucide-react'
 
 const TransportIcon = ({ mode }) => {
   switch (mode?.toLowerCase()) {
@@ -138,8 +138,17 @@ const ParticipantsTable = ({ participants, onDelete, onStatusChange, isAdmin }) 
               </td>
               <td>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                  <Phone size={12} color="var(--color-text-light)" />
-                  {p.phone}
+                  {p.hide_phone && !isAdmin ? (
+                    <span style={{ color: 'var(--color-text-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Lock size={12} /> Versteckt
+                    </span>
+                  ) : (
+                    <>
+                      <Phone size={12} color="var(--color-text-light)" />
+                      {p.phone}
+                      {p.hide_phone && isAdmin && <Lock size={12} color="var(--color-brand)" title="Vom Gast versteckt" style={{ marginLeft: '4px' }} />}
+                    </>
+                  )}
                 </div>
               </td>
               <td>
