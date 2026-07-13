@@ -116,11 +116,11 @@ begin
   -- Keep only digits and '+'
   formatted_phone := regexp_replace(p_phone, '[^0-9+]', '', 'g');
   
-  if formatted_phone starts with '00' then
+  if formatted_phone like '00%' then
     formatted_phone := '+' || substr(formatted_phone, 3);
-  elsif formatted_phone starts with '0' then
+  elsif formatted_phone like '0%' then
     formatted_phone := '+49' || substr(formatted_phone, 2);
-  elsif not (formatted_phone starts with '+') then
+  elsif not (formatted_phone like '+%') then
     formatted_phone := '+49' || formatted_phone;
   end if;
 
