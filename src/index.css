@@ -683,6 +683,207 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-flex;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Custom Alert (SMS Simulation) */
+.custom-alert {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: var(--color-bg-dark);
+  border: 1px solid var(--color-brand);
+  color: var(--color-white);
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2000;
+  animation: slideInUp 0.3s ease-out;
+}
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeInDown 0.8s ease-out;
+}
+
+/* Grid layout for form */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Donation Modal Styles */
+.donation-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.donation-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-family: var(--font-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.donation-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.donation-btn.popular {
+  border-color: var(--color-brand);
+  background: rgba(var(--color-brand-rgb, 12, 140, 233), 0.1);
+}
+
+.donation-btn.popular:hover {
+  background: rgba(var(--color-brand-rgb, 12, 140, 233), 0.15);
+}
+
+.donation-btn .amount {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.donation-btn .desc {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+}
+
+.badge-popular {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-brand);
+  color: var(--color-bg);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.skip-donation-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  text-decoration: underline;
+  opacity: 0.7;
+}
+
+.skip-donation-btn:hover {
+  color: var(--color-white);
+  opacity: 1;
+}
+
+@media (max-width: 800px) {
+  .app-container {
+    padding: 1rem;
+  }
+  
+  .glass-panel {
+    padding: 1.5rem;
+  }
+
+  .footer-brand-container {
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+  .logo-wrapper {
+    width: 90px;
+    height: 70px;
+  }
+  .logo-wrapper.left { order: 2; }
+  .admin-login-wrapper { order: 1; width: 100%; }
+  .logo-wrapper.right { order: 3; }
+  .title { font-size: 2.2rem; }
+  
+  .flex-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .flex-between > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .flex-between .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  .participants-table { font-size: 0.85rem; }
+  
+  .modal-overlay {
+    align-items: flex-start; /* Fixes top/bottom cutoff on mobile */
+    overflow-y: auto;
+    padding-top: 2rem;
+    padding-bottom: 8rem; /* Extra huge padding to ensure safe scroll clearance on iOS */
+  }
+  
+  .modal-content {
+    padding: 1.5rem !important;
+    max-height: none; /* Let the overlay handle the scrolling */
+  }
+  
+  .rules-container {
+    height: 200px;
+  }
+  
+  .admin-banner {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  /* Make table horizontally scrollable */
+  .table-container {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  th, td {
+    white-space: nowrap;
+  }
+  
+  .badge {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+  }
 }
 
 /* Action buttons in table */

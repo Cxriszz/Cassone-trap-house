@@ -9,6 +9,7 @@ import RulesModal from './components/RulesModal'
 import { supabase } from './supabaseClient'
 import InfoModal from './components/InfoModal'
 import CalendarView from './components/CalendarView'
+import DonationModal from './components/DonationModal'
 
 
 const MOCK_PARTICIPANTS = [
@@ -123,6 +124,7 @@ function App() {
   const [isRulesOpen, setIsRulesOpen] = useState(false)
   const [isInfoOpen, setIsInfoOpen] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const [activeImage, setActiveImage] = useState(null)
   
@@ -223,6 +225,7 @@ function App() {
       p_has_seats: newParticipant.has_seats,
       p_schlafplatz: newParticipant.schlafplatz,
       p_phone: newParticipant.phone,
+      p_hide_phone: newParticipant.hide_phone,
       p_notes: newParticipant.notes
     })
     
@@ -232,7 +235,7 @@ function App() {
     }
 
     setIsFormOpen(false)
-    alert("Deine Buchung war erfolgreich! Du erhältst in Kürze eine SMS-Bestätigung.")
+    setIsDonationModalOpen(true)
     
     // Reload public list
     fetchData()
@@ -250,6 +253,7 @@ function App() {
       p_has_seats: updatedParticipant.has_seats,
       p_schlafplatz: updatedParticipant.schlafplatz,
       p_phone: updatedParticipant.phone,
+      p_hide_phone: updatedParticipant.hide_phone,
       p_notes: updatedParticipant.notes
     })
 
@@ -641,6 +645,11 @@ function App() {
           <img src={activeImage} alt="Vergrößerte Ansicht" className="lightbox-image" />
         </div>
       )}
+
+      <DonationModal 
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
+      />
     </div>
   )
 }
