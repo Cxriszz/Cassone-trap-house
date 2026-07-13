@@ -5,18 +5,19 @@ const Header = () => {
   
   return (
     <header className="header-area">
-      <h1 className="title">Cassone Trap House 🇮🇹</h1>
-      <p className="subtitle">
-        <MapPin size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
+      <h1 className="title">Cassone Trap House 🏍️</h1>
+      <div className="subtitle-container">
+        <span className="subtitle">Gästeliste &amp; Planer</span>
         <a 
           href={googleMapsLink} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="location-link"
+          className="coordinates-pill"
         >
-          45°44'04.8"N 10°47'31.2"E
+          <MapPin size={14} />
+          {"45°44'04.8\"N 10°47'31.2\"E"}
         </a>
-      </p>
+      </div>
     </header>
   )
 }

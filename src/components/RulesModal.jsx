@@ -14,10 +14,10 @@ const RulesModal = ({ isOpen, onClose, onAccept }) => {
 
   return (
     <div className={`modal-overlay ${isOpen ? 'open' : ''}`}>
-      <div className="modal-content glass-panel" style={{ padding: '2rem' }}>
+      <div className="modal-content" style={{ padding: '2rem' }}>
         <div className="modal-header">
           <h3>Regelwerk 📜</h3>
-          <button className="close-btn" onClick={onClose}><X size={24} /></button>
+          <button className="close-btn" onClick={onClose}><X size={18} /></button>
         </div>
         
         <div 
@@ -29,7 +29,7 @@ const RulesModal = ({ isOpen, onClose, onAccept }) => {
             Trage dich bitte nur in die Liste ein, wenn du vorhast, die folgenden Hausregeln zu befolgen.
           </p>
 
-          <h4>1. Lärm & Nachbarn</h4>
+          <h4>1. Lärm &amp; Nachbarn</h4>
           <p>Bitte achte auf die Lautstärke, um unsere Nachbarn nicht zu stören. Die Lautstärke ist zu folgenden Zeiten zu reduzieren:</p>
           <ul>
             <li><strong>Morgens</strong></li>
@@ -43,7 +43,7 @@ const RulesModal = ({ isOpen, onClose, onAccept }) => {
 
           <p>Zusätzliche Bitten der Nachbarn bezüglich der Lautstärke sind ausnahmslos zu berücksichtigen.</p>
 
-          <h4>2. Sauberkeit, Müll & Abwasch</h4>
+          <h4>2. Sauberkeit, Müll &amp; Abwasch</h4>
           <p>Jeder räumt seinen eigenen Müll und Abwasch eigenständig weg. Wir trennen unseren Müll:</p>
           <ul>
             <li>Glas</li>
@@ -62,7 +62,7 @@ const RulesModal = ({ isOpen, onClose, onAccept }) => {
           <p>Bei wichtigen Problemen wendet euch direkt an die Kontaktdaten, welche in deiner Bestätigung (SMS) angegeben sind.</p>
           
           <br/>
-          <p style={{fontStyle: 'italic', textAlign: 'center', color: 'var(--color-text-light)'}}>
+          <p style={{fontStyle: 'italic', textAlign: 'center', color: 'var(--color-text-muted)'}}>
             Bitte scrolle bis ganz nach unten, um zuzustimmen.
           </p>
         </div>
@@ -77,8 +77,8 @@ const RulesModal = ({ isOpen, onClose, onAccept }) => {
             disabled={!hasScrolled}
             style={{ opacity: hasScrolled ? 1 : 0.5, cursor: hasScrolled ? 'pointer' : 'not-allowed' }}
           >
-            <Check size={18} />
-            Gelesen & Akzeptiert
+            <Check size={16} />
+            Gelesen &amp; Akzeptiert
           </button>
         </div>
       </div>

@@ -102,13 +102,13 @@ const AddParticipantForm = ({ isOpen, onClose, onSubmit, participants = [] }) =>
     <div className={`modal-overlay ${isOpen ? 'open' : ''}`} onClick={(e) => {
       if(e.target.className.includes('modal-overlay')) onClose();
     }}>
-      <div className="modal-content glass-panel" style={{ padding: '2rem' }}>
+      <div className="modal-content" style={{ padding: '2rem' }}>
         <div className="modal-header">
-          <h3>Ich bin dabei!</h3>
-          <button className="close-btn" onClick={onClose}><X size={24} /></button>
+          <h3>Ich bin dabei! 🚀</h3>
+          <button className="close-btn" onClick={onClose}><X size={18} /></button>
         </div>
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ padding: '1.5rem 0 0' }}>
           <div className="form-row">
             <div className="form-group">
               <label className="form-label">Dein Name</label>
@@ -133,7 +133,7 @@ const AddParticipantForm = ({ isOpen, onClose, onSubmit, participants = [] }) =>
               <label className="form-label">Anreise Datum</label>
               <input 
                 type="date" name="arrival_date" className="form-input" required
-               min={new Date().toLocaleDateString('sv-SE')}
+                min={new Date().toLocaleDateString('sv-SE')}
                 value={formData.arrival_date} onChange={handleChange}
               />
             </div>
@@ -190,14 +190,50 @@ const AddParticipantForm = ({ isOpen, onClose, onSubmit, participants = [] }) =>
               >
                 <option value="" disabled>Bitte wählen...</option>
                 <option value="Reggae Hut" disabled={reggaeHutFull}>
-                  🛖 Reggae Hut {reggaeHutFull ? '(Ausgebucht)' : `(noch ${reggaeHutMax - reggaeHutCount} frei)`}
+                  🛖 Reggae Hut {reggaeHutFull ? '(Ausgebucht)' : ''}
                 </option>
                 <option value="Haus" disabled={hausFull}>
-                  🏠 Haus {hausFull ? '(Ausgebucht)' : `(noch ${hausMax - hausCount} frei)`}
+                  🏠 Haus {hausFull ? '(Ausgebucht)' : ''}
                 </option>
                 <option value="Eigenes Zelt">⛺ Eigenes Zelt</option>
                 <option value="Hotel">🏨 Hotel</option>
               </select>
+
+              {formData.arrival_date && (
+                <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>🛖 Reggae Hut Belegung:</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: reggaeHutFull ? '#ef4444' : 'var(--color-text-muted)' }}>
+                      {reggaeHutCount} / {reggaeHutMax}
+                    </span>
+                  </div>
+                  <div className="schlafplatz-vacancy-bar">
+                    <div 
+                      className="schlafplatz-vacancy-fill" 
+                      style={{ 
+                        width: `${(reggaeHutCount / reggaeHutMax) * 100}%`,
+                        backgroundColor: reggaeHutFull ? '#ef4444' : 'var(--color-brand)' 
+                      }}
+                    ></div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>🏠 Haupthaus Belegung:</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: hausFull ? '#ef4444' : 'var(--color-text-muted)' }}>
+                      {hausCount} / {hausMax}
+                    </span>
+                  </div>
+                  <div className="schlafplatz-vacancy-bar">
+                    <div 
+                      className="schlafplatz-vacancy-fill" 
+                      style={{ 
+                        width: `${(hausCount / hausMax) * 100}%`,
+                        backgroundColor: hausFull ? '#ef4444' : 'var(--color-accent-blue)' 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
@@ -233,7 +269,7 @@ const AddParticipantForm = ({ isOpen, onClose, onSubmit, participants = [] }) =>
               Abbrechen
             </button>
             <button type="submit" className="btn btn-primary">
-              <Check size={18} />
+              <Check size={16} />
               Eintragen
             </button>
           </div>

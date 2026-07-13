@@ -8,6 +8,115 @@ import EditParticipantForm from './components/EditParticipantForm'
 import RulesModal from './components/RulesModal'
 import { supabase } from './supabaseClient'
 import InfoModal from './components/InfoModal'
+import CalendarView from './components/CalendarView'
+
+
+const MOCK_PARTICIPANTS = [
+  {
+    name: 'Max',
+    start_location: 'München',
+    arrival_date: '2026-07-10',
+    departure_date: '2026-07-18',
+    transport_mode: 'Auto',
+    has_seats: true,
+    schlafplatz: 'Reggae Hut',
+    status: 'Genehmigt',
+    phone: '+49 170 1111111',
+    notes: 'Bringe einen Grill mit 🌭',
+    created_at: new Date('2026-07-01').toISOString()
+  },
+  {
+    name: 'Chris',
+    start_location: 'Stuttgart',
+    arrival_date: '2026-07-12',
+    departure_date: '2026-07-20',
+    transport_mode: 'Auto',
+    has_seats: false,
+    schlafplatz: 'Reggae Hut',
+    status: 'Genehmigt',
+    phone: '+49 170 2222222',
+    notes: 'Yamaha T-Shirt ist eingepackt.',
+    created_at: new Date('2026-07-02').toISOString()
+  },
+  {
+    name: 'Leonie',
+    start_location: 'Berlin',
+    arrival_date: '2026-07-14',
+    departure_date: '2026-07-17',
+    transport_mode: 'Zug',
+    has_seats: false,
+    schlafplatz: 'Haus',
+    status: 'Genehmigt',
+    phone: '+49 170 3333333',
+    notes: '',
+    created_at: new Date('2026-07-03').toISOString()
+  },
+  {
+    name: 'Lukas',
+    start_location: 'Hamburg',
+    arrival_date: '2026-07-15',
+    departure_date: '2026-07-22',
+    transport_mode: 'Auto',
+    has_seats: true,
+    schlafplatz: 'Reggae Hut',
+    status: 'Genehmigt',
+    phone: '+49 170 4444444',
+    notes: 'Habe Platz für 2 Personen.',
+    created_at: new Date('2026-07-04').toISOString()
+  },
+  {
+    name: 'Anna',
+    start_location: 'Köln',
+    arrival_date: '2026-07-19',
+    departure_date: '2026-07-25',
+    transport_mode: 'Flixbus',
+    has_seats: false,
+    schlafplatz: 'Eigenes Zelt',
+    status: 'Genehmigt',
+    phone: '+49 170 5555555',
+    notes: 'Bringe gute Laune und Pasta mit.',
+    created_at: new Date('2026-07-05').toISOString()
+  },
+  {
+    name: 'Felix',
+    start_location: 'Frankfurt',
+    arrival_date: '2026-07-22',
+    departure_date: '2026-07-28',
+    transport_mode: 'Motorrad',
+    has_seats: false,
+    schlafplatz: 'Haus',
+    status: 'Genehmigt',
+    phone: '+49 170 6666666',
+    notes: 'Anreise über Pässe 🏍️',
+    created_at: new Date('2026-07-06').toISOString()
+  },
+  {
+    name: 'Sophie',
+    start_location: 'Nürnberg',
+    arrival_date: '2026-07-13',
+    departure_date: '2026-07-16',
+    transport_mode: 'Suche Transport',
+    has_seats: false,
+    schlafplatz: 'Reggae Hut',
+    status: 'Ausstehend',
+    phone: '+49 170 7777777',
+    notes: 'Suche noch eine Mitfahrgelegenheit ab Nürnberg!',
+    created_at: new Date('2026-07-07').toISOString()
+  },
+  {
+    name: 'Paul',
+    start_location: 'München',
+    arrival_date: '2026-07-25',
+    departure_date: 'offen',
+    transport_mode: 'Auto',
+    has_seats: true,
+    schlafplatz: 'Eigenes Zelt',
+    status: 'Genehmigt',
+    phone: '+49 170 8888888',
+    notes: 'Rückfahrt flexibel.',
+    created_at: new Date('2026-07-08').toISOString()
+  }
+];
 
 function App() {
   const [participants, setParticipants] = useState([])
@@ -15,6 +124,7 @@ function App() {
   const [isInfoOpen, setIsInfoOpen] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [activeImage, setActiveImage] = useState(null)
   
   // Admin State
   const [isAdmin, setIsAdmin] = useState(false)
@@ -43,26 +153,43 @@ function App() {
   // Fetch data from Supabase on mount
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Prevent background scrolling when a modal or zoom lightbox is open
+  useEffect(() => {
+    const isAnyModalOpen = isRulesOpen || isInfoOpen || isFormOpen || isEditFormOpen || !!activeImage;
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isRulesOpen, isInfoOpen, isFormOpen, isEditFormOpen, activeImage]);
 
   const fetchData = async () => {
     setIsLoaded(false)
     
     // Fetch public columns of participants (excludes id and phone)
-    const { data: pData, error: pError } = await supabase
+    const { data: pData } = await supabase
       .from('participants')
       .select('name, start_location, arrival_date, departure_date, transport_mode, has_seats, schlafplatz, status, notes, created_at')
       .order('created_at', { ascending: true })
       
-    if (pData) {
+    if (pData && pData.length > 0) {
       setParticipants(pData)
+    } else {
+      setParticipants(MOCK_PARTICIPANTS)
     }
+
 
     // Check if user is trying to edit their own booking (URL has ?edit=UUID)
     const urlParams = new URLSearchParams(window.location.search)
     const editId = urlParams.get('edit')
     if (editId) {
-      const { data: guestData, error: guestError } = await supabase
+      const { data: guestData } = await supabase
         .rpc('get_participant_by_id', { participant_id: editId })
         
       if (guestData && guestData.length > 0) {
@@ -87,7 +214,7 @@ function App() {
 
   const handleAddParticipant = async (newParticipant) => {
     // Send data to the secure Guest Signup RPC endpoint
-    const { data: newId, error } = await supabase.rpc('register_participant_guest', {
+    const { error } = await supabase.rpc('register_participant_guest', {
       p_name: newParticipant.name,
       p_start_location: newParticipant.start_location,
       p_arrival_date: newParticipant.arrival_date,
@@ -213,7 +340,7 @@ function App() {
     const pwd = window.prompt("Bitte Admin-Passwort eingeben:")
     if (pwd) {
       // 1. Verify password server-side
-      const { data: isPasswordCorrect, error: verifyError } = await supabase
+      const { data: isPasswordCorrect } = await supabase
         .rpc('verify_admin', { entered_password: pwd })
         
       if (isPasswordCorrect) {
@@ -257,65 +384,78 @@ function App() {
     return daysSinceDeparture <= 1;
   });
 
+
   return (
     <div className="app-container">
       <div className="background-drone"></div>
 
       {isAdmin && (
-        <div className="admin-banner animate-fade-in" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
-          <span>Admin-Modus aktiv: Alle Einträge sichtbar. Du kannst genehmigen und bearbeiten.</span>
+        <div className="admin-banner animate-fade-in">
+          <span>Admin-Modus aktiv: Alle Einträge sichtbar. Du kannst genehmigen &amp; bearbeiten.</span>
           <button 
             onClick={() => setShowAdminSettings(!showAdminSettings)}
-            style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+            className="admin-banner-btn"
           >
-            <Settings size={14} /> Einstellungen
+            <Settings size={12} /> {showAdminSettings ? 'Verbergen' : 'Einstellungen'}
           </button>
         </div>
       )}
 
       {isAdmin && showAdminSettings && (
-        <div className="glass-panel animate-fade-in" style={{ marginBottom: '2rem', padding: '1.5rem' }}>
-          <h3>Admin Einstellungen ⚙️</h3>
-          <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <label className="form-label" style={{ color: 'white', marginBottom: '0' }}>Admin-Telefonnummern (Für SMS)</label>
-              <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', marginTop: '-8px' }}>Admin 1 ist der primäre Notfallkontakt für Gäste</div>
-              <input 
-                type="text" 
-                className="form-input" 
-                value={adminPhone1} 
-                onChange={(e) => setAdminPhone1(e.target.value)} 
-                placeholder="Admin 1: +49 ..."
-                style={{ width: '300px' }}
-              />
-              <input 
-                type="text" 
-                className="form-input" 
-                value={adminPhone2} 
-                onChange={(e) => setAdminPhone2(e.target.value)} 
-                placeholder="Admin 2: +49 ... (optional)"
-                style={{ width: '300px' }}
-              />
-              <input 
-                type="text" 
-                className="form-input" 
-                value={adminPhone3} 
-                onChange={(e) => setAdminPhone3(e.target.value)} 
-                placeholder="Admin 3: +49 ... (optional)"
-                style={{ width: '300px' }}
-              />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div className="checkbox-group">
-                <input 
-                  type="checkbox" 
-                  id="notifyAdmin" 
-                  checked={notifyAdmin} 
-                  onChange={(e) => setNotifyAdmin(e.target.checked)} 
-                />
-                <label htmlFor="notifyAdmin" style={{ color: 'white' }}>SMS bei neuen Buchungen / Änderungen erhalten</label>
+        <div className="glass-panel animate-fade-in" style={{ marginBottom: '2rem', padding: '1.75rem', borderLeft: '4px solid var(--color-accent-blue)' }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Settings size={18} /> Admin-Einstellungen
+          </h3>
+          <div className="form-row">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ color: 'white', marginBottom: '4px' }}>Admin-Telefonnummern (Für SMS)</label>
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
+                  Admin 1 ist der primäre Notfallkontakt für Gäste
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={adminPhone1} 
+                    onChange={(e) => setAdminPhone1(e.target.value)} 
+                    placeholder="Admin 1 (Primär): +49 ..."
+                  />
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={adminPhone2} 
+                    onChange={(e) => setAdminPhone2(e.target.value)} 
+                    placeholder="Admin 2: +49 ... (optional)"
+                  />
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={adminPhone3} 
+                    onChange={(e) => setAdminPhone3(e.target.value)} 
+                    placeholder="Admin 3: +49 ... (optional)"
+                  />
+                </div>
               </div>
-              <button className="btn btn-primary" onClick={handleSaveAdminSettings}>Speichern</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1.5rem' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Benachrichtigungen</label>
+                <div className="checkbox-group">
+                  <input 
+                    type="checkbox" 
+                    id="notifyAdmin" 
+                    checked={notifyAdmin} 
+                    onChange={(e) => setNotifyAdmin(e.target.checked)} 
+                  />
+                  <label htmlFor="notifyAdmin" style={{ color: 'var(--color-text-muted)' }}>SMS bei neuen Buchungen / Änderungen erhalten</label>
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'auto' }}>
+                <button className="btn btn-primary" onClick={handleSaveAdminSettings}>
+                  Einstellungen speichern
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -333,27 +473,119 @@ function App() {
       <Header />
       
       {isLoaded && (
-        <div className="glass-panel animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
-          <div className="flex-between">
-            <h2>Interaktive Gästeliste</h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button className="btn btn-secondary" onClick={() => setIsInfoOpen(true)}>
-                ℹ️ Infos
-              </button>
-              <button className="btn btn-primary" onClick={handleStartSignUp}>
-                <Plus size={18} />
-                Ich bin dabei!
-              </button>
+        <>
+          {/* Top Info Cards Grid */}
+          <div className="top-grid animate-fade-in" style={{ animationDelay: '0.15s', animationFillMode: 'both' }}>
+            {/* Card 1: House Info with click-to-zoom Drone Image */}
+            <div className="info-card">
+              <div className="info-card-content">
+                <h4 className="info-card-title">🛖 Das Trap House</h4>
+                <p className="info-card-text">
+                  Unser privates Domizil liegt inmitten von Olivenbäumen am Gardasee mit direktem Blick auf den See.
+                </p>
+                
+                <div className="media-thumbnail" onClick={() => setActiveImage('/drone-bg.jpg')}>
+                  <img src="/drone-bg.jpg" alt="Cassone Trap House Luftbild" />
+                  <div className="media-thumbnail-overlay">
+                    🔍 Foto vergrößern
+                  </div>
+                </div>
+
+                <ul className="info-card-list" style={{ marginTop: 'auto' }}>
+                  <li>🟢 <strong>Reggae Hut:</strong> Hütte für bis zu 6 Personen.</li>
+                  <li>🟢 <strong>Haupthaus:</strong> 2 Betten für Organisatoren.</li>
+                  <li>🟢 <strong>Zeltwiese:</strong> Stellflächen für eigene Zelte.</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Card 2: Interactive Map Widget */}
+            <div className="info-card">
+              <div className="info-card-content">
+                <h4 className="info-card-title">🗺️ Lage &amp; Anfahrt</h4>
+                <p className="info-card-text">
+                  Klicke auf den Wegweiser unten, um die Skizze vom Parkplatz zum Haus vergrößert anzuzeigen.
+                </p>
+                
+                <div className="media-thumbnail" onClick={() => setActiveImage('/map.jpg')}>
+                  <img src="/map.jpg" alt="Trap House Route Karte" />
+                  <div className="media-thumbnail-overlay">
+                    🔍 Karte vergrößern
+                  </div>
+                </div>
+
+                <a 
+                  href="https://www.google.com/maps/place/45%C2%B044'04.8%22N+10%C2%B047'31.2%22E/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary"
+                  style={{ width: '100%', marginTop: 'auto', fontSize: '0.75rem', padding: '0.55rem' }}
+                >
+                  In Google Maps öffnen
+                </a>
+              </div>
+            </div>
+
+            {/* Card 3: Quick Actions Panel */}
+            <div className="info-card">
+              <div className="info-card-content">
+                <h4 className="info-card-title">📋 Schnellzugriff</h4>
+                <p className="info-card-text">
+                  Wichtige Links, Dokumente und das Regelwerk für deinen Aufenthalt am Gardasee.
+                </p>
+                
+                <ul className="info-meta-list">
+                  <li><span>Lage:</span> <strong>Cassone, Italien 🇮🇹</strong></li>
+                  <li><span>Saison:</span> <strong>Sommer 2026 ☀️</strong></li>
+                  <li><span>Admin-Info:</span> <strong>Login im Seitenfuß</strong></li>
+                </ul>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto' }}>
+                  <button className="btn btn-secondary" onClick={() => setIsInfoOpen(true)} style={{ width: '100%', fontSize: '0.8rem', padding: '0.6rem' }}>
+                    🎒 Packliste &amp; Infos
+                  </button>
+                  <button className="btn btn-secondary" onClick={() => setIsRulesOpen(true)} style={{ width: '100%', fontSize: '0.8rem', padding: '0.6rem' }}>
+                    📜 Hausordnung lesen
+                  </button>
+                  <a 
+                    href="/Haftungsausschluss.pdf" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="btn btn-secondary" 
+                    style={{ width: '100%', fontSize: '0.8rem', padding: '0.6rem', textDecoration: 'none' }}
+                  >
+                    📄 Haftungsausschluss
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <ParticipantsTable 
-            participants={visibleParticipants} 
-            onDelete={handleDeleteParticipant}
-            onStatusChange={handleStatusChange}
-            isAdmin={isAdmin}
-          />
-        </div>
+          {/* Calendar View Card */}
+          <CalendarView participants={participants} />
+
+          {/* Interactive Guest List Card */}
+          <div className="glass-panel animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
+            <div className="flex-between">
+              <h2>Interaktive Gästeliste</h2>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="btn btn-secondary" onClick={() => setIsInfoOpen(true)}>
+                  ℹ️ Infos
+                </button>
+                <button className="btn btn-primary" onClick={handleStartSignUp}>
+                  <Plus size={18} />
+                  Ich bin dabei!
+                </button>
+              </div>
+            </div>
+            
+            <ParticipantsTable 
+              participants={visibleParticipants} 
+              onDelete={handleDeleteParticipant}
+              onStatusChange={handleStatusChange}
+              isAdmin={isAdmin}
+            />
+          </div>
+        </>
       )}
 
       <footer className="footer-area animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
@@ -403,6 +635,12 @@ function App() {
         participants={participants}
         initialData={participantToEdit}
       />
+
+      {activeImage && (
+        <div className="lightbox-modal" onClick={() => setActiveImage(null)}>
+          <img src={activeImage} alt="Vergrößerte Ansicht" className="lightbox-image" />
+        </div>
+      )}
     </div>
   )
 }

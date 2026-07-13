@@ -89,89 +89,169 @@ const ParticipantsTable = ({ participants, onDelete, onStatusChange, isAdmin }) 
   }
 
   return (
-    <div className="table-container">
-      <table className="participants-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>An/Abreise</th>
-            {isAdmin && <th>Tage</th>}
-            <th>Transport</th>
-            <th>Schlafplatz</th>
-            <th>Status</th>
-            <th>Kontakt</th>
-            <th>Notizen</th>
-            {isAdmin && <th></th>}
-          </tr>
-        </thead>
-        <tbody>
-          {participants.map((p, index) => (
-            <tr key={p.id || index}>
-              <td>
-                <div style={{ fontWeight: 600 }}>{p.name}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>aus {p.start_location}</div>
-              </td>
-              <td>
-                <div style={{ fontSize: '0.9rem' }}>{formatDate(p.arrival_date)}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>bis {formatDate(p.departure_date)}</div>
-              </td>
-              {isAdmin && (
+    <>
+      {/* Desktop View */}
+      <div className="table-container desktop-only">
+        <table className="participants-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>An/Abreise</th>
+              {isAdmin && <th>Tage</th>}
+              <th>Transport</th>
+              <th>Schlafplatz</th>
+              <th>Status</th>
+              <th>Kontakt</th>
+              <th>Notizen</th>
+              {isAdmin && <th></th>}
+            </tr>
+          </thead>
+          <tbody>
+            {participants.map((p, index) => (
+              <tr key={p.id || index}>
                 <td>
-                  <strong>{calculateDays(p.arrival_date, p.departure_date)}</strong>
+                  <div style={{ fontWeight: 700, color: 'var(--color-white)' }}>{p.name}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>aus {p.start_location}</div>
                 </td>
-              )}
-              <td>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <span className={`badge badge-${p.transport_mode?.split(' ')[0]?.toLowerCase() || 'auto'}`}>
+                <td>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 500 }}>{formatDate(p.arrival_date)}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>bis {formatDate(p.departure_date)}</div>
+                </td>
+                {isAdmin && (
+                  <td>
+                    <strong style={{ color: 'var(--color-white)' }}>{calculateDays(p.arrival_date, p.departure_date)}</strong>
+                  </td>
+                )}
+                <td>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <span className={`badge badge-${p.transport_mode?.split(' ')[0]?.toLowerCase() || 'auto'}`}>
+                      <TransportIcon mode={p.transport_mode} />
+                    </span>
+                    {p.has_seats && (p.transport_mode === 'Auto' || p.transport_mode === 'Motorrad') && (
+                      <span className="badge-seats">Plätze frei</span>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <strong style={{ color: 'var(--color-white)' }}>{p.schlafplatz || '-'}</strong>
+                </td>
+                <td>
+                  {renderStatus(p)}
+                </td>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                    {p.hide_phone && !isAdmin ? (
+                      <span style={{ color: 'var(--color-text-muted)' }}>-</span>
+                    ) : (
+                      <>
+                        <Phone size={12} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
+                        <a href={`tel:${p.phone}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.phone}</a>
+                        {p.hide_phone && isAdmin && <Lock size={12} color="var(--color-brand)" title="Vom Gast versteckt" style={{ marginLeft: '4px', flexShrink: 0 }} />}
+                      </>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  {p.notes ? (
+                    <div style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', maxWidth: '180px', lineHeight: '1.4' }}>
+                      {p.notes}
+                    </div>
+                  ) : '-'}
+                </td>
+                {isAdmin && (
+                  <td style={{ textAlign: 'right' }}>
+                    <button 
+                      className="action-btn delete" 
+                      onClick={() => onDelete(p.id)}
+                      title="Eintrag löschen"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card List View */}
+      <div className="mobile-only">
+        {participants.map((p, index) => (
+          <div key={p.id || index} className={`participant-card status-${p.status?.toLowerCase() || 'pending'}`}>
+            <div className="card-header">
+              <div>
+                <div className="card-title">{p.name}</div>
+                <div className="card-subtitle">aus {p.start_location}</div>
+              </div>
+              {renderStatus(p)}
+            </div>
+            
+            <div className="card-grid">
+              <div className="card-info-item">
+                <span className="card-info-label">Zeitraum</span>
+                <div className="card-info-value" style={{ fontWeight: 500 }}>
+                  {formatDate(p.arrival_date)} - {formatDate(p.departure_date)}
+                </div>
+              </div>
+              
+              <div className="card-info-item">
+                <span className="card-info-label">Schlafplatz</span>
+                <div className="card-info-value"><strong>{p.schlafplatz || '-'}</strong></div>
+              </div>
+              
+              <div className="card-info-item">
+                <span className="card-info-label">Transport</span>
+                <div className="card-info-value">
+                  <span className={`badge badge-${p.transport_mode?.split(' ')[0]?.toLowerCase() || 'auto'}`} style={{ marginBottom: '2px' }}>
                     <TransportIcon mode={p.transport_mode} />
                   </span>
                   {p.has_seats && (p.transport_mode === 'Auto' || p.transport_mode === 'Motorrad') && (
-                    <span className="badge-seats">Plätze frei</span>
+                    <div><span className="badge-seats">Plätze frei</span></div>
                   )}
                 </div>
-              </td>
-              <td>
-                <strong>{p.schlafplatz || '-'}</strong>
-              </td>
-              <td>
-                {renderStatus(p)}
-              </td>
-              <td>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+              </div>
+              
+              <div className="card-info-item">
+                <span className="card-info-label">Kontakt</span>
+                <div className="card-info-value" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
                   {p.hide_phone && !isAdmin ? (
-                    <span style={{ color: 'var(--color-text-light)' }}>-</span>
+                    <span style={{ color: 'var(--color-text-muted)' }}>-</span>
                   ) : (
                     <>
-                      <Phone size={12} color="var(--color-text-light)" />
-                      {p.phone}
-                      {p.hide_phone && isAdmin && <Lock size={12} color="var(--color-brand)" title="Vom Gast versteckt" style={{ marginLeft: '4px' }} />}
+                      <Phone size={12} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
+                      <a href={`tel:${p.phone}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.phone}</a>
+                      {p.hide_phone && isAdmin && <Lock size={12} color="var(--color-brand)" title="Vom Gast versteckt" style={{ flexShrink: 0 }} />}
                     </>
                   )}
                 </div>
-              </td>
-              <td>
-                {p.notes ? (
-                  <div style={{ color: 'var(--color-text-light)', fontSize: '0.8rem', maxWidth: '180px' }}>
-                    {p.notes}
-                  </div>
-                ) : '-'}
-              </td>
-              {isAdmin && (
-                <td style={{ textAlign: 'right' }}>
-                  <button 
-                    className="action-btn delete" 
-                    onClick={() => onDelete(p.id)}
-                    title="Eintrag löschen"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+              </div>
+            </div>
+
+            {p.notes && (
+              <div className="card-notes">
+                {p.notes}
+              </div>
+            )}
+
+            {isAdmin && (
+              <div className="card-actions">
+                <span style={{ marginRight: 'auto', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                  Dauer: <strong>{calculateDays(p.arrival_date, p.departure_date)} Tage</strong>
+                </span>
+                <button 
+                  className="action-btn delete" 
+                  onClick={() => onDelete(p.id)}
+                  title="Eintrag löschen"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
 
