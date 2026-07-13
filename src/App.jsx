@@ -8,12 +8,14 @@ import EditParticipantForm from './components/EditParticipantForm'
 import RulesModal from './components/RulesModal'
 import { supabase } from './supabaseClient'
 import InfoModal from './components/InfoModal'
+import DonationModal from './components/DonationModal'
 
 function App() {
   const [participants, setParticipants] = useState([])
   const [isRulesOpen, setIsRulesOpen] = useState(false)
   const [isInfoOpen, setIsInfoOpen] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   
   // Admin State
@@ -105,7 +107,7 @@ function App() {
     }
 
     setIsFormOpen(false)
-    alert("Deine Buchung war erfolgreich! Du erhältst in Kürze eine SMS-Bestätigung.")
+    setIsDonationModalOpen(true)
     
     // Reload public list
     fetchData()
@@ -402,6 +404,11 @@ function App() {
         onSubmit={handleEditSubmit}
         participants={participants}
         initialData={participantToEdit}
+      />
+
+      <DonationModal 
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
       />
     </div>
   )
