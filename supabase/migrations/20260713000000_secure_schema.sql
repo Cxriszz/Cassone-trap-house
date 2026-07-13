@@ -102,7 +102,7 @@ create or replace function public.register_participant_guest(
   p_has_seats boolean,
   p_schlafplatz text,
   p_phone text,
-  hide_phone boolean default false,
+  p_hide_phone boolean,
   p_notes text
 )
 returns uuid
