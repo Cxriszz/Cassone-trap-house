@@ -20,7 +20,7 @@ drop table if exists public.admins cascade;
 
 -- Create participants table
 create table public.participants (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   name text not null,
   start_location text,
   arrival_date text,
@@ -37,7 +37,7 @@ create table public.participants (
 
 -- Create admins table to store admin numbers
 create table public.admins (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   phone text not null,
   is_primary boolean default false,
   receive_sms boolean default true
