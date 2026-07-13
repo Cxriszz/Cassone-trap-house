@@ -12,8 +12,8 @@ drop function if exists public.update_participant_status_admin(text, uuid, text)
 drop function if exists public.delete_participant_admin(text, uuid);
 drop function if exists public.save_admin_settings_admin(text, text, text, text, boolean);
 drop function if exists public.get_participant_by_id(uuid);
-drop function if exists public.register_participant_guest(text, text, text, text, text, boolean, text, text, text);
-drop function if exists public.update_participant_guest(uuid, text, text, text, text, text, boolean, text, text, text);
+drop function if exists public.register_participant_guest(text, text, text, text, text, boolean, text, text, boolean, text);
+drop function if exists public.update_participant_guest(uuid, text, text, text, text, text, boolean, text, text, boolean, text);
 drop table if exists public.admin_secrets cascade;
 drop table if exists public.participants cascade;
 drop table if exists public.admins cascade;
@@ -29,6 +29,7 @@ create table public.participants (
   has_seats boolean default false,
   schlafplatz text,
   phone text,
+  hide_phone boolean default false,
   notes text,
   status text default 'Ausstehend',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -101,6 +102,7 @@ create or replace function public.register_participant_guest(
   p_has_seats boolean,
   p_schlafplatz text,
   p_phone text,
+  hide_phone boolean default false,
   p_notes text
 )
 returns uuid
@@ -131,6 +133,7 @@ begin
     has_seats,
     schlafplatz,
     phone,
+    hide_phone,
     notes,
     status
   ) values (
@@ -142,6 +145,7 @@ begin
     p_has_seats,
     p_schlafplatz,
     formatted_phone,
+    p_hide_phone,
     p_notes,
     'Ausstehend'
   )
@@ -163,6 +167,7 @@ returns table (
   has_seats boolean,
   schlafplatz text,
   phone text,
+  hide_phone boolean,
   notes text,
   status text,
   created_at timestamp with time zone
@@ -171,7 +176,7 @@ language plpgsql
 security definer
 as $$
 begin
-  return query select p.id, p.name, p.start_location, p.arrival_date, p.departure_date, p.transport_mode, p.has_seats, p.schlafplatz, p.phone, p.notes, p.status, p.created_at
+  return query select p.id, p.name, p.start_location, p.arrival_date, p.departure_date, p.transport_mode, p.has_seats, p.schlafplatz, p.phone, p.hide_phone, p.notes, p.status, p.created_at
                from public.participants p
                where p.id = participant_id;
 end;
@@ -188,6 +193,7 @@ create or replace function public.update_participant_guest(
   p_has_seats boolean,
   p_schlafplatz text,
   p_phone text,
+  p_hide_phone boolean,
   p_notes text
 )
 returns void
@@ -212,11 +218,11 @@ begin
   end if;
 
   formatted_phone := regexp_replace(p_phone, '[^0-9+]', '', 'g');
-  if formatted_phone starts with '00' then
+  if formatted_phone like '00%' then
     formatted_phone := '+' || substr(formatted_phone, 3);
-  elsif formatted_phone starts with '0' then
+  elsif formatted_phone like '0%' then
     formatted_phone := '+49' || substr(formatted_phone, 2);
-  elsif not (formatted_phone starts with '+') then
+  elsif not (formatted_phone like '+%') then
     formatted_phone := '+49' || formatted_phone;
   end if;
 
@@ -230,6 +236,7 @@ begin
     has_seats = p_has_seats,
     schlafplatz = p_schlafplatz,
     phone = formatted_phone,
+    hide_phone = p_hide_phone,
     notes = p_notes,
     status = new_status
   where id = participant_id;
@@ -248,6 +255,7 @@ returns table (
   has_seats boolean,
   schlafplatz text,
   phone text,
+  hide_phone boolean,
   notes text,
   status text,
   created_at timestamp with time zone
@@ -257,7 +265,7 @@ security definer
 as $$
 begin
   if public.verify_admin(admin_password) then
-    return query select p.id, p.name, p.start_location, p.arrival_date, p.departure_date, p.transport_mode, p.has_seats, p.schlafplatz, p.phone, p.notes, p.status, p.created_at
+    return query select p.id, p.name, p.start_location, p.arrival_date, p.departure_date, p.transport_mode, p.has_seats, p.schlafplatz, p.phone, p.hide_phone, p.notes, p.status, p.created_at
                  from public.participants p
                  order by p.created_at asc;
   else
@@ -271,6 +279,7 @@ create or replace function public.get_admin_settings_admin(admin_password text)
 returns table (
   id uuid,
   phone text,
+  hide_phone boolean,
   is_primary boolean,
   receive_sms boolean
 )
@@ -279,7 +288,7 @@ security definer
 as $$
 begin
   if public.verify_admin(admin_password) then
-    return query select a.id, a.phone, a.is_primary, a.receive_sms
+    return query select a.id, a.phone, false as hide_phone, a.is_primary, a.receive_sms
                  from public.admins a
                  order by a.id asc;
   else

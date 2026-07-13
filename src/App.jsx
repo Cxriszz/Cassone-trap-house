@@ -98,6 +98,7 @@ function App() {
       p_has_seats: newParticipant.has_seats,
       p_schlafplatz: newParticipant.schlafplatz,
       p_phone: newParticipant.phone,
+      p_hide_phone: newParticipant.hide_phone,
       p_notes: newParticipant.notes
     })
     
@@ -125,6 +126,7 @@ function App() {
       p_has_seats: updatedParticipant.has_seats,
       p_schlafplatz: updatedParticipant.schlafplatz,
       p_phone: updatedParticipant.phone,
+      p_hide_phone: updatedParticipant.hide_phone,
       p_notes: updatedParticipant.notes
     })
 
