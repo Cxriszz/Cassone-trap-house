@@ -5,7 +5,7 @@ const Header = () => {
   
   return (
     <header className="header-area">
-      <h1 className="title">Cassone Trap House</h1>
+      <h1 className="title">Cassone Trap House 🏍️🇮🇹</h1>
       <p className="subtitle">
         <MapPin size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
         <a 

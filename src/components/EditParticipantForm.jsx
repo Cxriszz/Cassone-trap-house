@@ -76,6 +76,15 @@ const EditParticipantForm = ({ isOpen, onClose, onSubmit, participants = [], ini
       return
     }
 
+    if (!formData.isDepartureOpen && formData.arrival_date && formData.departure_date) {
+      const start = parseISO(formData.arrival_date)
+      const end = parseISO(formData.departure_date)
+      if (isBefore(end, start)) {
+        alert("Das Abreisedatum darf nicht vor dem Anreisedatum liegen.")
+        return
+      }
+    }
+
     const finalData = { ...formData }
     if (finalData.isDepartureOpen) {
       finalData.departure_date = 'offen'
@@ -124,7 +133,7 @@ const EditParticipantForm = ({ isOpen, onClose, onSubmit, participants = [], ini
               <label className="form-label">Anreise Datum</label>
               <input 
                 type="date" name="arrival_date" className="form-input" required
-                min={new Date().toISOString().split('T')[0]}
+               min={new Date().toLocaleDateString('sv-SE')}
                 value={formData.arrival_date} onChange={handleChange}
               />
             </div>
