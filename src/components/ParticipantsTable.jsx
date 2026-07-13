@@ -105,8 +105,8 @@ const ParticipantsTable = ({ participants, onDelete, onStatusChange, isAdmin }) 
           </tr>
         </thead>
         <tbody>
-          {participants.map((p) => (
-            <tr key={p.id}>
+          {participants.map((p, index) => (
+            <tr key={p.id || index}>
               <td>
                 <div style={{ fontWeight: 600 }}>{p.name}</div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>aus {p.start_location}</div>

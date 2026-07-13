@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Lock, Unlock, Send, Settings, User } from 'lucide-react'
+import { Plus, Lock, Unlock, Send, Settings } from 'lucide-react'
 import { differenceInDays, parseISO, isValid } from 'date-fns'
 import Header from './components/Header'
 import ParticipantsTable from './components/ParticipantsTable'
@@ -18,6 +18,7 @@ function App() {
   
   // Admin State
   const [isAdmin, setIsAdmin] = useState(false)
+  const [adminPassword, setAdminPassword] = useState('')
   const [adminPhone1, setAdminPhone1] = useState('')
   const [adminPhone2, setAdminPhone2] = useState('')
   const [adminPhone3, setAdminPhone3] = useState('')
@@ -28,7 +29,7 @@ function App() {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false)
   const [participantToEdit, setParticipantToEdit] = useState(null)
 
-  // SMS Alert Simulation State
+  // Floating notifications state
   const [alerts, setAlerts] = useState([])
 
   const addAlert = (msg) => {
@@ -39,63 +40,40 @@ function App() {
     }, 8000)
   }
 
-  // Fetch data from Supabase
+  // Fetch data from Supabase on mount
   useEffect(() => {
     fetchData()
   }, [])
 
   const fetchData = async () => {
-    // Fetch Participants
+    setIsLoaded(false)
+    
+    // Fetch public columns of participants (excludes id and phone)
     const { data: pData, error: pError } = await supabase
       .from('participants')
-      .select('*')
+      .select('name, start_location, arrival_date, departure_date, transport_mode, has_seats, schlafplatz, status, notes, created_at')
       .order('created_at', { ascending: true })
       
     if (pData) {
       setParticipants(pData)
-      const urlParams = new URLSearchParams(window.location.search)
-      const editId = urlParams.get('edit')
-      if (editId) {
-        const pToEdit = pData.find(x => x.id === editId)
-        if (pToEdit) {
-          setParticipantToEdit(pToEdit)
-          setIsEditFormOpen(true)
-        }
-      }
     }
-    
-    // Fetch Admins
-    const { data: aData, error: aError } = await supabase
-      .from('admins')
-      .select('*')
-      .order('id', { ascending: true })
-      
-    if (aData && aData.length > 0) {
-      const primary = aData.find(a => a.is_primary)
-      const others = aData.filter(a => !a.is_primary)
-      if (primary) setAdminPhone1(primary.phone)
-      if (others[0]) setAdminPhone2(others[0].phone)
-      if (others[1]) setAdminPhone3(others[1].phone)
-      
-      setNotifyAdmin(aData[0].receive_sms)
+
+    // Check if user is trying to edit their own booking (URL has ?edit=UUID)
+    const urlParams = new URLSearchParams(window.location.search)
+    const editId = urlParams.get('edit')
+    if (editId) {
+      const { data: guestData, error: guestError } = await supabase
+        .rpc('get_participant_by_id', { participant_id: editId })
+        
+      if (guestData && guestData.length > 0) {
+        setParticipantToEdit(guestData[0])
+        setIsEditFormOpen(true)
+      } else {
+        addAlert("⚠️ Eintrag nicht gefunden oder abgelaufen.")
+      }
     }
     
     setIsLoaded(true)
-  }
-
-  const sendRealSms = async (to, body) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('send-sms', {
-        body: { to, body }
-      })
-      if (error) {
-        console.error("SMS Error:", error)
-      } else if (data && data.error) {
-        console.error("SMS Data Error:", data.error)
-      }
-    } catch (e) {
-      console.error(e)
-    }
   }
 
   const handleStartSignUp = () => {
@@ -108,165 +86,162 @@ function App() {
   }
 
   const handleAddParticipant = async (newParticipant) => {
-    // Keep only digits and '+'
-    let formattedPhone = newParticipant.phone.replace(/[^0-9+]/g, '');
-    
-    if (formattedPhone.startsWith('00')) {
-      formattedPhone = '+' + formattedPhone.substring(2);
-    } else if (formattedPhone.startsWith('0')) {
-      formattedPhone = '+49' + formattedPhone.substring(1);
-    } else if (!formattedPhone.startsWith('+')) {
-      formattedPhone = '+49' + formattedPhone;
-    }
-
-    const { data, error } = await supabase.from('participants').insert([{
-      name: newParticipant.name,
-      start_location: newParticipant.start_location,
-      arrival_date: newParticipant.arrival_date,
-      departure_date: newParticipant.departure_date,
-      transport_mode: newParticipant.transport_mode,
-      has_seats: newParticipant.has_seats,
-      schlafplatz: newParticipant.schlafplatz,
-      phone: formattedPhone,
-      hide_phone: newParticipant.hide_phone,
-      notes: newParticipant.notes,
-      status: 'Ausstehend'
-    }]).select()
+    // Send data to the secure Guest Signup RPC endpoint
+    const { data: newId, error } = await supabase.rpc('register_participant_guest', {
+      p_name: newParticipant.name,
+      p_start_location: newParticipant.start_location,
+      p_arrival_date: newParticipant.arrival_date,
+      p_departure_date: newParticipant.departure_date,
+      p_transport_mode: newParticipant.transport_mode,
+      p_has_seats: newParticipant.has_seats,
+      p_schlafplatz: newParticipant.schlafplatz,
+      p_phone: newParticipant.phone,
+      p_notes: newParticipant.notes
+    })
     
     if (error) {
-      alert("Fehler beim Speichern: " + error.message)
+      alert("Fehler beim Eintragen: " + error.message)
       return
     }
 
-    const participantWithId = data[0]
-    setParticipants([...participants, participantWithId])
     setIsFormOpen(false)
+    alert("Deine Buchung war erfolgreich! Du erhältst in Kürze eine SMS-Bestätigung.")
     
-    // Real SMS to Admin
-    if (notifyAdmin) {
-      const phones = [adminPhone1, adminPhone2, adminPhone3].filter(p => p && p.trim() !== '')
-      for (const phone of phones) {
-        const msg = `Neue Buchung von ${newParticipant.name}. Bitte prüfen!`
-        await sendRealSms(phone, msg)
-      }
-    }
-    
-    // Real SMS to Guest
-    alert("Deine Buchung war erfolgreich!")
-    const editLink = `${window.location.origin}/?edit=${participantWithId.id}`
-    const smsText = `Cassone: Buchung eingegangen! Dein Status ist in Bearbeitung. Kontakt: ${adminPhone1}. Bearbeiten/Löschen: ${editLink}`
-    
-    await sendRealSms(formattedPhone, smsText)
+    // Reload public list
+    fetchData()
   }
 
   const handleEditSubmit = async (updatedParticipant) => {
-    const wasApproved = updatedParticipant.status === 'Genehmigt'
-    const newStatus = wasApproved ? 'Ausstehend' : updatedParticipant.status
-    
-    const { data, error } = await supabase.from('participants').update({
-      name: updatedParticipant.name,
-      start_location: updatedParticipant.start_location,
-      arrival_date: updatedParticipant.arrival_date,
-      departure_date: updatedParticipant.departure_date,
-      transport_mode: updatedParticipant.transport_mode,
-      has_seats: updatedParticipant.has_seats,
-      schlafplatz: updatedParticipant.schlafplatz,
-      phone: updatedParticipant.phone,
-      hide_phone: updatedParticipant.hide_phone,
-      notes: updatedParticipant.notes,
-      status: newStatus
-    }).eq('id', updatedParticipant.id).select()
+    // Send data to the secure Guest Edit RPC endpoint
+    const { error } = await supabase.rpc('update_participant_guest', {
+      participant_id: updatedParticipant.id,
+      p_name: updatedParticipant.name,
+      p_start_location: updatedParticipant.start_location,
+      p_arrival_date: updatedParticipant.arrival_date,
+      p_departure_date: updatedParticipant.departure_date,
+      p_transport_mode: updatedParticipant.transport_mode,
+      p_has_seats: updatedParticipant.has_seats,
+      p_schlafplatz: updatedParticipant.schlafplatz,
+      p_phone: updatedParticipant.phone,
+      p_notes: updatedParticipant.notes
+    })
 
     if (error) {
-      alert("Fehler beim Speichern: " + error.message)
+      alert("Fehler beim Speichern der Änderungen: " + error.message)
       return
     }
 
-    const finalParticipant = data[0]
-    setParticipants(participants.map(p => 
-      p.id === updatedParticipant.id ? finalParticipant : p
-    ))
     setIsEditFormOpen(false)
     setParticipantToEdit(null)
+    addAlert("Eintrag erfolgreich aktualisiert!")
     
-    if (wasApproved && notifyAdmin) {
-      const phones = [adminPhone1, adminPhone2, adminPhone3].filter(p => p && p.trim() !== '')
-      phones.forEach(phone => {
-        const msg = `${updatedParticipant.name} hat den Eintrag bearbeitet. Status wieder auf Ausstehend gesetzt!`
-        addAlert(`📱 [ADMIN SMS an ${phone}]: ${msg}`)
-        sendRealSms(phone, msg)
-      })
-    } else {
-      addAlert("Eintrag erfolgreich aktualisiert.")
-    }
-  }
-
-  const handleSimulateEditLink = (id) => {
-    const p = participants.find(x => x.id === id)
-    if (p) {
-      setParticipantToEdit(p)
-      setIsEditFormOpen(true)
-    }
+    // Clear url parameter (?edit=...)
+    window.history.replaceState({}, document.title, window.location.pathname)
+    
+    // Reload data
+    fetchData()
   }
 
   const handleDeleteParticipant = async (id) => {
-    if (isAdmin) {
+    if (isAdmin && adminPassword) {
       if (window.confirm('Möchtest du diesen Eintrag wirklich löschen?')) {
-        const { error } = await supabase.from('participants').delete().eq('id', id)
+        const { error } = await supabase.rpc('delete_participant_admin', {
+          admin_password: adminPassword,
+          participant_id: id
+        })
+        
         if (!error) {
           setParticipants(participants.filter(p => p.id !== id))
+          addAlert("Eintrag gelöscht.")
         } else {
-          alert("Fehler beim Löschen!")
+          alert("Fehler beim Löschen: " + error.message)
         }
       }
     }
   }
 
   const handleStatusChange = async (id, newStatus) => {
-    if (isAdmin) {
-      const { data, error } = await supabase.from('participants').update({ status: newStatus }).eq('id', id).select()
+    if (isAdmin && adminPassword) {
+      const { error } = await supabase.rpc('update_participant_status_admin', {
+        admin_password: adminPassword,
+        participant_id: id,
+        new_status: newStatus
+      })
+      
       if (!error) {
         setParticipants(participants.map(p => 
-          p.id === id ? data[0] : p
+          p.id === id ? { ...p, status: newStatus } : p
         ))
-        
-        const p = participants.find(x => x.id === id)
-        const actionText = newStatus === 'Genehmigt' ? 'Genehmigt' : 'Abgelehnt'
-        
-        const msg = `Hallo ${p?.name}, deine Buchung wurde: ${actionText}!`
-        await sendRealSms(p?.phone, msg)
+        addAlert(`Status auf "${newStatus}" geändert.`)
       } else {
-        alert("Fehler beim Update!")
+        alert("Fehler beim Ändern des Status: " + error.message)
       }
     }
   }
 
   const handleSaveAdminSettings = async () => {
-    // Delete all admins and insert new ones to sync
-    await supabase.from('admins').delete().neq('id', '00000000-0000-0000-0000-000000000000') // Deletes all safely if RLS permits
-    
-    const inserts = []
-    if (adminPhone1) inserts.push({ phone: adminPhone1, is_primary: true, receive_sms: notifyAdmin })
-    if (adminPhone2) inserts.push({ phone: adminPhone2, is_primary: false, receive_sms: notifyAdmin })
-    if (adminPhone3) inserts.push({ phone: adminPhone3, is_primary: false, receive_sms: notifyAdmin })
-    
-    if (inserts.length > 0) {
-      await supabase.from('admins').insert(inserts)
+    if (isAdmin && adminPassword) {
+      const { error } = await supabase.rpc('save_admin_settings_admin', {
+        admin_password: adminPassword,
+        phone1: adminPhone1,
+        phone2: adminPhone2,
+        phone3: adminPhone3,
+        notify: notifyAdmin
+      })
+      
+      if (!error) {
+        alert("Admin-Einstellungen in der Datenbank gespeichert!")
+      } else {
+        alert("Fehler beim Speichern: " + error.message)
+      }
     }
-    alert("Admin-Einstellungen in der Datenbank gespeichert!")
   }
 
-  const handleAdminToggle = () => {
+  const handleAdminToggle = async () => {
     if (isAdmin) {
       setIsAdmin(false)
+      setAdminPassword('')
       setShowAdminSettings(false)
+      setAdminPhone1('')
+      setAdminPhone2('')
+      setAdminPhone3('')
+      // Reload public data
+      fetchData()
       return
     }
+    
     const pwd = window.prompt("Bitte Admin-Passwort eingeben:")
-    if (pwd === "cassone2026") {
-      setIsAdmin(true)
-    } else if (pwd !== null) {
-      alert("Falsches Passwort!")
+    if (pwd) {
+      // 1. Verify password server-side
+      const { data: isPasswordCorrect, error: verifyError } = await supabase
+        .rpc('verify_admin', { entered_password: pwd })
+        
+      if (isPasswordCorrect) {
+        setIsAdmin(true)
+        setAdminPassword(pwd)
+        
+        // 2. Load complete database details with IDs and phone numbers
+        const { data: pData } = await supabase.rpc('get_participants_admin', { admin_password: pwd })
+        if (pData) {
+          setParticipants(pData)
+        }
+        
+        // 3. Load Admin phone settings
+        const { data: aData } = await supabase.rpc('get_admin_settings_admin', { admin_password: pwd })
+        if (aData && aData.length > 0) {
+          const primary = aData.find(a => a.is_primary)
+          const others = aData.filter(a => !a.is_primary)
+          if (primary) setAdminPhone1(primary.phone)
+          if (others[0]) setAdminPhone2(others[0].phone)
+          if (others[1]) setAdminPhone3(others[1].phone)
+          
+          setNotifyAdmin(aData[0].receive_sms)
+        }
+        
+        addAlert("🔑 Admin-Modus aktiviert.")
+      } else {
+        alert("Falsches Passwort!")
+      }
     }
   }
 
@@ -350,7 +325,7 @@ function App() {
         {alerts.map(alert => (
           <div key={alert.id} className="custom-alert">
             <Send size={18} style={{ flexShrink: 0 }} />
-            <div>{typeof alert.msg === 'string' ? alert.msg : alert.msg}</div>
+            <div>{alert.msg}</div>
           </div>
         ))}
       </div>
