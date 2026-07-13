@@ -51,7 +51,7 @@ create table public.admin_secrets (
 
 -- Insert default admin credentials (bcrypt hash of 'cassone2026')
 insert into public.admin_secrets (password_hash)
-values (crypt('cassone2026', gen_salt('bf')));
+values (extensions.crypt('cassone2026', extensions.gen_salt('bf')));
 
 -- Enable RLS for all tables
 alter table public.participants enable row level security;
@@ -85,7 +85,7 @@ as $$
 declare
   is_valid boolean;
 begin
-  select (password_hash = crypt(entered_password, password_hash)) into is_valid
+  select (password_hash = extensions.crypt(entered_password, password_hash)) into is_valid
   from public.admin_secrets
   where id = 1;
   return coalesce(is_valid, false);
