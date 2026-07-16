@@ -1,6 +1,7 @@
 -- Enable required extensions
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
+create extension if not exists "pg_net";
 
 -- Drop existing resources to rebuild cleanly if needed
 drop trigger if exists on_participant_change on public.participants;
