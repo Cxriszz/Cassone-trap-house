@@ -52,7 +52,7 @@ const InfoModal = ({ isOpen, onClose }) => {
           <h4>Lage &amp; Anfahrt 🗺️</h4>
           <p>Hier siehst du die Orientierungskarte für das Anreisen. Parkplätze sind unten an der Hauptstraße.</p>
           <div style={{ marginTop: '10px', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--glass-border)', boxShadow: '0 5px 15px rgba(0,0,0,0.5)' }}>
-            <img src="/map.jpg" alt="Cassone Trap House Anfahrtskarte" style={{ width: '100%', height: 'auto', display: 'block' }} />
+            <img src="/map.jpg" alt="Casa Cassone Aperta Anfahrtskarte" style={{ width: '100%', height: 'auto', display: 'block' }} />
           </div>
 
           <p style={{ marginTop: '1.5rem', fontWeight: 'bold', color: 'var(--color-white)' }}>Bei Fragen gerne melden!</p>

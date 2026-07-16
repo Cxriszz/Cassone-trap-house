@@ -5,7 +5,7 @@ const Header = () => {
   
   return (
     <header className="header-area">
-      <h1 className="title">Cassone Trap House 🏍️</h1>
+      <h1 className="title">Casa Cassone Aperta 🏍️</h1>
       <div className="subtitle-container">
         <span className="subtitle">Gästeliste &amp; Planer</span>
         <a 

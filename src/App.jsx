@@ -483,13 +483,13 @@ function App() {
             {/* Card 1: House Info with click-to-zoom Drone Image */}
             <div className="info-card">
               <div className="info-card-content">
-                <h4 className="info-card-title">🛖 Das Trap House</h4>
+                <h4 className="info-card-title">🛖 Das Casa Cassone Aperta</h4>
                 <p className="info-card-text">
                   Unser privates Domizil liegt inmitten von Olivenbäumen am Gardasee mit direktem Blick auf den See.
                 </p>
                 
                 <div className="media-thumbnail" onClick={() => setActiveImage('/drone-bg.jpg')}>
-                  <img src="/drone-bg.jpg" alt="Cassone Trap House Luftbild" />
+                  <img src="/drone-bg.jpg" alt="Casa Cassone Aperta Luftbild" />
                   <div className="media-thumbnail-overlay">
                     🔍 Foto vergrößern
                   </div>
@@ -512,7 +512,7 @@ function App() {
                 </p>
                 
                 <div className="media-thumbnail" onClick={() => setActiveImage('/map.jpg')}>
-                  <img src="/map.jpg" alt="Trap House Route Karte" />
+                  <img src="/map.jpg" alt="Casa Cassone Aperta Route Karte" />
                   <div className="media-thumbnail-overlay">
                     🔍 Karte vergrößern
                   </div>

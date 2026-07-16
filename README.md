@@ -1,4 +1,4 @@
-# Cassone Trap House 🛖🏠
+# Casa Cassone Aperta 🛖🏠
 
 A modern, responsive, and secure **React + Vite** holiday coordinating web application styled with a dark glassmorphic interface. Built to coordinate guest stays, sleeping arrangements, travel schedules, and noise rule compliance for a private vacation house near Lake Garda, Italy.
 
