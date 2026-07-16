@@ -378,7 +378,7 @@ declare
   edit_link text;
   primary_admin text := '';
   req_headers text;
-  origin text := 'https://cassone-trap-house.vercel.app';
+  origin text := 'https://casa-cassone.vercel.app';
 begin
   -- Resolve request origin for guest edit links
   req_headers := current_setting('request.headers', true);
