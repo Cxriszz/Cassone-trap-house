@@ -1916,3 +1916,36 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
+
+@media (max-width: 800px) {
+  .calendar-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px;
+    margin-right: -1.5rem; /* Allow scroll past glass-panel padding */
+    padding-right: 1.5rem;
+  }
+  .weekdays-grid, .days-grid {
+    min-width: 550px;
+  }
+  .calendar-grid-container {
+    max-width: 100%;
+  }
+  .calendar-day-cell {
+    min-height: 60px;
+  }
+  .day-guests-list {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+.guest-item-main {
+  min-width: 0;
+  flex: 1;
+}
+.guest-name, .guest-location {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
