@@ -174,10 +174,10 @@ function App() {
   const fetchData = async () => {
     setIsLoaded(false)
     
-    // Fetch public columns of participants (excludes id and phone)
+    // Fetch public columns of participants
     const { data: pData } = await supabase
       .from('participants')
-      .select('name, start_location, arrival_date, departure_date, transport_mode, has_seats, schlafplatz, status, notes, created_at')
+      .select('name, start_location, arrival_date, departure_date, transport_mode, has_seats, schlafplatz, status, notes, created_at, phone, hide_phone')
       .order('created_at', { ascending: true })
       
     if (pData && pData.length > 0) {
