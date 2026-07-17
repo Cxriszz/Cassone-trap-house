@@ -134,7 +134,6 @@ const AddParticipantForm = ({ isOpen, onClose, onSubmit, participants = [] }) =>
               <label className="form-label">Anreise Datum</label>
               <input 
                 type="date" name="arrival_date" className="form-input" required
-                min={new Date().toLocaleDateString('sv-SE')}
                 value={formData.arrival_date} onChange={handleChange}
               />
             </div>
