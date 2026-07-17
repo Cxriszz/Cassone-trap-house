@@ -180,10 +180,8 @@ function App() {
       .select('name, start_location, arrival_date, departure_date, transport_mode, has_seats, schlafplatz, status, notes, created_at, phone, hide_phone')
       .order('created_at', { ascending: true })
       
-    if (pData && pData.length > 0) {
+    if (pData) {
       setParticipants(pData)
-    } else {
-      setParticipants(MOCK_PARTICIPANTS)
     }
 
 
