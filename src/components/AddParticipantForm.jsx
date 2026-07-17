@@ -13,6 +13,7 @@ const AddParticipantForm = ({ isOpen, onClose, onSubmit, participants = [] }) =>
     has_seats: false,
     schlafplatz: '',
     phone: '',
+    hide_phone: false,
     notes: ''
   })
 
